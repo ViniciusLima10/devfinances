@@ -12,7 +12,9 @@
 🪐Essa versao em especifico possui um "Theme Switcher" visando melhorar a experiencia do usuario que também salva a preferencia escolhida pelo usuario no navegador.
 
 
+
 English
+
 
 🪐Financial control application developed by Mayk Brito during the Discover Marathon offered by Rocketseat.
 
