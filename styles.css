@@ -162,6 +162,11 @@ header #logo {
 
 .card.total {
     background: var(--cardtotal);
+
+}
+
+.negative {
+    background: var(--red);
 }
 
 .card.total span,
