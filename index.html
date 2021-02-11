@@ -7,7 +7,9 @@
     <title>dev.finance$</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,400;0,700;1,100;1,400;1,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,400;0,700;1,100;1,400;1,700&display=swap"
+        rel="stylesheet">
     <link rel="shortcut icon" href="./assets/total.svg" type="image/x-icon">
     <script src="https://kit.fontawesome.com/2153c37e0b.js" crossorigin="anonymous"></script>
 </head>
@@ -43,7 +45,7 @@
             <div class="card">
                 <h3>
                     <span>Saídas</span>
-                    <img src="./assets/expense.svg" alt="Imagem de saídas">	
+                    <img src="./assets/expense.svg" alt="Imagem de saídas">
                 </h3>
                 <p id="expenseDisplay">R$ 0,00</p>
             </div>
@@ -51,7 +53,7 @@
             <div id='totalcard' class="card total">
                 <h3>
                     <span>Total</span>
-                    <img  id='imgtotal' src="./assets/total.svg" alt="Total">
+                    <img id='imgtotal' src="./assets/total.svg" alt="Total">
                 </h3>
                 <p id="totalDisplay">R$ 0,00</p>
             </div>
@@ -63,9 +65,12 @@
         <section id="transaction">
             <h2 class="sr-only">Transações</h2>
 
-            <a href="#" 
-            onclick="Modal.open()"
-            class="button new">+ Nova Transação</a>
+            <div class="navOptions">
+                <a href="#" onclick="Modal.openModal()" class="button new">+ Nova Transação</a>
+
+                <a href="#" onclick="Modal.openFilter()" class="button new"><i class=" filter fas fa-sort-down"></i>
+                    Filtrar</a>
+            </div>
 
             <table id='data-table'>
                 <thead>
@@ -93,48 +98,92 @@
                     <div class="input-group">
                         <label class='sr-only' for="description">Descrição</label>
                         <input 
-                            type="text" 
-                            id='description' 
-                            name='description' 
-                            placeholder="Descrição"/>
+                        type="text" 
+                        required='none'
+                        id='description' 
+                        name='description' 
+                        placeholder="Descrição" />
                     </div>
 
                     <div class="input-group">
                         <label class='sr-only' for="amount">Valor</label>
                         <input 
-                            type="number" 
-                            step='0.01' 
-                            id='amount' 
-                            name='amount' 
-                            placeholder="0,00"/>
-                        <small class="help">Use o sinal - (negativo) para despesas e , (vírgula) para casas decimais</small>
+                        type="number"
+                        step='0.01' 
+                        required='none'
+                        id='amount' 
+                        name='amount' 
+                        placeholder="0,00" />
+                        <small class="help">Use o sinal - (negativo) para despesas e , (vírgula) para casas
+                            decimais</small>
                     </div>
 
                     <div class="input-group">
                         <label class='sr-only' for="date">Data</label>
                         <input 
-                            type="date" 
-                            id='date' 
-                            name='date' 
-                            max="2999-01-01"
-                            placeholder='dd/mm/yyyy'/>
+                        type="date" 
+                        required='none'
+                        id='date' 
+                        name='date' 
+                        max="2999-01-01" 
+                        placeholder='dd/mm/yyyy' />
                     </div>
 
                     <div class="input-group actions">
-                        <a href="#" onclick="Modal.close()" class="button cancel">Cancelar</a>
+                        <a href="#" onclick="Modal.closeModal()" class="button cancel">Cancelar</a>
                         <button type="submit">Salvar</button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-    
+
+    <div class="filter-overlay">
+        <div class="modalFilter">
+            <div id="filter">
+                <h2>Filtrar</h2>
+                <form action="" onsubmit="filtrar()">
+                    <div class="amounts">
+                        <div class="input-group">
+                            <p>Data inicial:</p>
+                            <label class='sr-only' for="startDate">Data Inicial</label>
+                            <input 
+                            type="date" 
+                            id='startDate' 
+                            name='startDate' 
+                            max="2999-01-01" 
+                            placeholder='Data inicial:' />
+                        </div>
+
+
+                        <div class="input-group">
+                            <p>Data Final:</p>
+                            <label class='sr-only' for="finalDate">Data Final</label>
+                            <input 
+                            type="date" 
+                            id='finalDate' 
+                            name='finalDate' 
+                            max="2999-01-01" 
+                            placeholder='Data final:' />
+                        </div>
+
+                        <div class="input-group actions">
+                            <a href="#" onclick="Modal.closeFilter()" class="button cancel">Cancelar</a>
+                            <button type="submit" onclick="filtrar()">Salvar</button>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+
     <footer class='footer'>
         <p>dev.finance$
             <br>Desenvolvido por Vinicius Lima.
             <br>
             <a target="_blank" href="https://github.com/ViniciusLima10"><i class="fab fa-github"></i></a>
-            <a target="_blank" href="https://www.linkedin.com/in/vinicius-almeida-lima-3281771b1/"><i class="fab fa-linkedin-in"></i></i></a>
+            <a target="_blank" href="https://www.linkedin.com/in/vinicius-almeida-lima-3281771b1/"><i
+                    class="fab fa-linkedin-in"></i></i></a>
         </p>
     </footer>
 

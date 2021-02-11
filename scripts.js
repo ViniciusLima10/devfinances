@@ -1,28 +1,39 @@
 // Adicionar modal/ remover modal
 const Modal = {
-    open() {
+    openModal() {
         // abrir modal
         //Adicionar a class active ao modal
         document.querySelector('.modal-overlay')
             .classList
             .add('active')
     },
-    close() {
+    closeModal() {
         // Fechar modal
         //Remover a class active do modal
         document
             .querySelector('.modal-overlay')
             .classList
             .remove('active')
+    },
+
+    openFilter() {
+        // abrir modal
+        //Adicionar a class active ao modal
+        document.querySelector('.filter-overlay')
+            .classList
+            .add('active')
+    },
+    closeFilter() {
+        // Fechar modal
+        //Remover a class active do modal
+        document
+            .querySelector('.filter-overlay')
+            .classList
+            .remove('active')
     }
 }       
 
 
-
-// implementaçao dos calculos de finanças
-//[ ] somar as entradas
-//[ ] depois somar as saidas
-//[ ] remover das entradas o valor das saidas 
 
 const Storage = {
     get() {
@@ -38,15 +49,41 @@ const Transaction = {
     all: Storage.get(),
 
     add(transaction){
-        Transaction.all.push(transaction)
 
-        App.reload()
+        if(Transaction.all.length==0){
+            identifier = 1
+        }else{
+            identifier = Transaction.all[Transaction.all.length-1].identifier+1
+        }
+        newTransaction={
+            'description':transaction.description,
+            'amount':transaction.amount,
+            'date':transaction.date,
+            'identifier': identifier
+        }
+
+        Transaction.all.push(newTransaction)
+
+        startDate= document.querySelector('input#startDate').value
+        finalDate= document.querySelector('input#finalDate').value
+        App.reload(startDate, finalDate)
     },
 
-    remove(index) {
-        Transaction.all.splice(index, 1)
+    remove(identifier) {
+        
+        indexSelect = 0
+        while (indexSelect<Transaction.all.length) {
+            if(Transaction.all[indexSelect].identifier==identifier){
+                break
+            }
+            indexSelect++;
+        }
 
-        App.reload()
+        Transaction.all.splice(indexSelect, 1)
+
+        startDate= document.querySelector('input#startDate').value
+        finalDate= document.querySelector('input#finalDate').value
+        App.reload(startDate, finalDate)
     },
 
     incomes() {
@@ -95,7 +132,7 @@ const DOM = {
         <td class="${CSSclass}">${amount}</td>
         <td class="date">${transaction.date}</td>
         <td>
-            <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
+            <img onclick="Transaction.remove(${transaction.identifier})" src="./assets/minus.svg" alt="Remover transação">
         </td>
         `
 
@@ -147,10 +184,19 @@ const Utils = {
     }
 }
 
+
 const Form = {
     description: document.querySelector('input#description'),
     amount: document.querySelector('input#amount'),
     date: document.querySelector('input#date'),
+    index: document.querySelector('input#index'),
+
+
+    filterMinAmount: document.querySelector('input#minAmountFilter'),
+    filterMaxAmount: document.querySelector('input#maxAmountFilter'),
+    filterDate: document.querySelector('input#dateFilter'),
+
+    
 
     getValues() {
         return {
@@ -198,7 +244,7 @@ const Form = {
             const transaction = Form.formatValues()
             Transaction.add(transaction)
             Form.clearFields()
-            Modal.close()
+            Modal.closeModal()
         } catch (error) {
             alert(error.message)
         }
@@ -286,9 +332,42 @@ function totalImg() {
 }
 
 
+function filtrar () {
+    startDate=document.querySelector('input#startDate').value
+    finalDate=document.querySelector('input#finalDate').value
+    App.reload(startDate,finalDate)
+
+}
 const App = {
-    init() {
-        Transaction.all.forEach(DOM.addTransaction)
+    init(startDate, finalDate) {
+        console.log(startDate)
+        console.log(finalDate)
+        newTransactions=[]
+        
+
+
+
+        indexTransaction=0
+        while(indexTransaction<Transaction.all.length){
+            dateTransaction=Transaction.all[indexTransaction].date
+            dateInParts = dateTransaction.split('/')
+            dateToCheck=dateInParts[2]+'-'+dateInParts[1]+'='+dateInParts[0]
+            insertTransaction=true
+
+
+            if (startDate!='' && dateToCheck<startDate){
+                insertTransaction = false
+            }
+            if (finalDate!='' && dateToCheck>finalDate){
+                insertTransaction = false
+            }
+            if (insertTransaction){
+                newTransactions.push(Transaction.all[indexTransaction])
+            }
+            indexTransaction++;
+        }
+
+        newTransactions.forEach(DOM.addTransaction)
         DOM.updateBalance()
         Storage.set(Transaction.all)
         balanceCheck()
@@ -296,10 +375,10 @@ const App = {
         window.onload = totalImg()
         setTimeout(totalLightbackground(), 3000)
     },
-    reload() {
+    reload(startDate, finalDate) {
         DOM.clearTransactions()
-        App.init()
+        App.init(startDate, finalDate)
     },
 }
 
-App.init()
+App.init('', '')

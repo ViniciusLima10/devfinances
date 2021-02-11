@@ -272,6 +272,80 @@ td.expense {
 small.help{   
     color: var(--dark-blue)
 }
+/* Filter ==================================== */
+.navOptions {
+    display: flex;
+    justify-content: space-between
+}
+
+.filter {
+    color: var(--green)
+}
+
+
+.filter-overlay {
+    width: 100%;
+    height: 100%;
+
+    background-color: rgba(0,0,0,0.7);
+
+    position: fixed;
+    top: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    visibility: hidden;
+
+    z-index: 999;
+}
+
+.filter-overlay.active {
+    opacity: 1;
+    visibility: visible; 
+}
+
+#filter {
+    max-width: 500px;
+
+}
+
+#filter h2 {
+    margin-top: 0;
+}
+
+#filter form input {
+    border: none;
+    border-radius: 0.2rem;
+    padding: 0.8rem;
+    width: 100%;
+    background-color: var(--inputbackgroundcolor);
+}
+
+
+.modalFilter {
+    background: var(--backgroundcolormodal);
+    padding: 2.4rem;
+    width: 90%;
+    max-width: 500px;
+    position: absolute;
+    z-index: 1;
+}
+
+
+#filter form input {
+    border: none;
+    border-radius: 0.2rem;
+    padding: 0.8rem;
+    width: 100%;
+    background-color: var(--inputbackgroundcolor);
+
+}
+
+
+
 /* Form ==================================== */
 #form {
     max-width: 500px;
@@ -346,13 +420,6 @@ i:hover {
 }
 
 /* Theme Switcher ==================================== */
-.themetoggler {
-    display: flex;
-    justify-content: flex-end;
-    padding-right: 4rem;
-    padding-bottom: 2px;
-}
-
 body.dark {
     --dark-blue: #ffffff;
     --green: #49aa26;
@@ -375,6 +442,12 @@ body.light {
     transition: 0.2s linear
 }
 
+.themetoggler {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 4rem;
+    padding-bottom: 2px;
+}
 .checkbox {
     opacity: 0;
     position: absolute;
