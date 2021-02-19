@@ -68,8 +68,9 @@
             <div class="navOptions">
                 <a href="#" onclick="Modal.openModal()" class="button new">+ Nova Transação</a>
 
-                <a href="#" onclick="Modal.openFilter()" class="button new"><i class=" filter fas fa-sort-down"></i>
-                    Filtrar</a>
+                
+                <a href="#" onclick="Modal.openFilter()" class="button new"><i class=" filter fas fa-sort-down"></i>Filtrar</a>
+                
             </div>
 
             <table id='data-table'>
@@ -94,7 +95,7 @@
         <div class="modal">
             <div id="form">
                 <h2>Nova Transação</h2>
-                <form action="" onsubmit="Form.submit(event)">
+                <form action="" onsubmit="Form.submit(event, 'transaction')">
                     <div class="input-group">
                         <label class='sr-only' for="description">Descrição</label>
                         <input 
@@ -142,7 +143,7 @@
         <div class="modalFilter">
             <div id="filter">
                 <h2>Filtrar</h2>
-                <form action="" onsubmit="filtrar()">
+                <form action="" onsubmit="Form.submit(event,'filter')">
                     <div class="amounts">
                         <div class="input-group">
                             <p>Data inicial:</p>
@@ -169,7 +170,7 @@
 
                         <div class="input-group actions">
                             <a href="#" onclick="Modal.closeFilter()" class="button cancel">Cancelar</a>
-                            <button type="submit" onclick="filtrar()">Salvar</button>
+                            <button>Salvar</button>
                         </div>
                 </form>
             </div>
