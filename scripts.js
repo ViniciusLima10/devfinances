@@ -1,57 +1,105 @@
 // Adicionar modal/ remover modal
 const Modal = {
-    open() {
+    openModal() {
         // abrir modal
         //Adicionar a class active ao modal
         document.querySelector('.modal-overlay')
             .classList
             .add('active')
     },
-    close() {
+    closeModal() {
         // Fechar modal
         //Remover a class active do modal
         document
             .querySelector('.modal-overlay')
             .classList
             .remove('active')
+    },
+
+    openFilter() {
+        // abrir modal
+        //Adicionar a class active ao modal
+        document.querySelector('.filter-overlay')
+            .classList
+            .add('active')
+    },
+    closeFilter() {
+        // Fechar modal
+        //Remover a class active do modal
+        document
+            .querySelector('.filter-overlay')
+            .classList
+            .remove('active')
     }
 }       
 
-
-
-// implementaçao dos calculos de finanças
-//[ ] somar as entradas
-//[ ] depois somar as saidas
-//[ ] remover das entradas o valor das saidas 
-
 const Storage = {
-    get() {
-        return JSON.parse(localStorage.getItem("dev.finances:transactions")) || []
+    get(storage) {
+        if (storage=='transaction'){
+            return JSON.parse(localStorage.getItem("dev.finances:transactions")) || []
+        }
+        else if (storage=='filter'){
+            return JSON.parse(localStorage.getItem("dev.finances:filter")) || []
+        }
     },
 
-    set(transactions) {
-        localStorage.setItem("dev.finances:transactions", JSON.stringify(transactions))
+    set(storage, value) {
+        if (storage=='transaction'){
+            localStorage.setItem("dev.finances:transactions", JSON.stringify(value))
+        }
+        else if (storage=='filter'){
+            localStorage.setItem("dev.finances:filter", JSON.stringify(value))
+        }
+    },
+    delete(target){
+        if (target=='filter'){
+            localStorage.removeItem("dev.finances:filter")
+        }
     }
 }
 
 const Transaction = {
-    all: Storage.get(),
+    all: Storage.get('transaction'),
+
 
     add(transaction){
-        Transaction.all.push(transaction)
 
+        if(Transaction.all.length==0){
+            identifier = 1
+        }else{
+            identifier = Transaction.all[Transaction.all.length-1].identifier+1
+        }
+        newTransaction={
+            'description':transaction.description,
+            'amount':transaction.amount,
+            'date':transaction.date,
+            'identifier': identifier
+        }
+
+        Transaction.all.push(newTransaction)
         App.reload()
     },
 
-    remove(index) {
-        Transaction.all.splice(index, 1)
+    remove(identifier) {
+        
+        indexSelect = 0
+        while (indexSelect<Transaction.all.length) {
+            if(Transaction.all[indexSelect].identifier==identifier){
+                break
+            }
+            indexSelect++;
+        }
 
+        Transaction.all.splice(indexSelect, 1)
+
+        startDate= document.querySelector('input#startDate').value
+        finalDate= document.querySelector('input#finalDate').value
         App.reload()
     },
 
-    incomes() {
+    incomes(newTransactions) {
         let income = 0;
-        Transaction.all.forEach(transaction => {
+        newTransactions.forEach(transaction => {
             if( transaction.amount > 0 ) {
                 income += transaction.amount;
             }
@@ -59,9 +107,9 @@ const Transaction = {
         return income;
     },
 
-    expenses() {
+    expenses(newTransactions) {
         let expense = 0;
-        Transaction.all.forEach(transaction => {
+        newTransactions.forEach(transaction => {
             if( transaction.amount < 0 ) {
                 expense += transaction.amount;
             }
@@ -69,9 +117,23 @@ const Transaction = {
         return expense;
     },
 
-    total() {
-        return Transaction.incomes() + Transaction.expenses();
+
+    total(newTransactions) {
+        filter = localStorage.getItem("dev.finances:filter")
+        return Transaction.incomes(newTransactions) + Transaction.expenses(newTransactions);
     }
+}
+
+const Filter = {
+    update(filter){
+        Storage.delete('filter')
+        Storage.set('filter', filter) 
+    },
+
+    select(){
+        filter=Storage.get('filter')
+        return filter
+    },
 }
 
 const DOM = {
@@ -89,29 +151,30 @@ const DOM = {
         const CSSclass = transaction.amount > 0 ? "income" : "expense"
 
         const amount = Utils.formatCurrency(transaction.amount)
+        const date = Utils.formatDate(transaction.date)
 
         const html = `
         <td class="description">${transaction.description}</td>
         <td class="${CSSclass}">${amount}</td>
-        <td class="date">${transaction.date}</td>
+        <td class="date">${date}</td>
         <td>
-            <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
+            <img onclick="Transaction.remove(${transaction.identifier})" src="./assets/minus.svg" alt="Remover transação">
         </td>
         `
 
         return html
     },
 
-    updateBalance() {
+    updateBalance(newTransactions) {
         document
             .getElementById('incomeDisplay')
-            .innerHTML = Utils.formatCurrency(Transaction.incomes())
+            .innerHTML = Utils.formatCurrency(Transaction.incomes(newTransactions))
         document
             .getElementById('expenseDisplay')
-            .innerHTML = Utils.formatCurrency(Transaction.expenses())
+            .innerHTML = Utils.formatCurrency(Transaction.expenses(newTransactions))
         document
             .getElementById('totalDisplay')
-            .innerHTML = Utils.formatCurrency(Transaction.total())
+            .innerHTML = Utils.formatCurrency(Transaction.total(newTransactions))
     },
 
     clearTransactions() {
@@ -147,40 +210,75 @@ const Utils = {
     }
 }
 
+
 const Form = {
     description: document.querySelector('input#description'),
     amount: document.querySelector('input#amount'),
     date: document.querySelector('input#date'),
+    index: document.querySelector('input#index'),
 
-    getValues() {
-        return {
-            description: Form.description.value,
-            amount: Form.amount.value,
-            date: Form.date.value
+
+    startDate: document.querySelector('input#startDate'),
+    finalDate: document.querySelector('input#finalDate'),
+
+    
+
+    getValues(formType) {
+        if (formType=='transaction'){
+            return {
+                description: Form.description.value,
+                amount: Form.amount.value,
+                date: Form.date.value
+            }
         }
+        else if (formType=='filter'){
+            return {
+                startDate: Form.startDate.value,
+                finalDate: Form.finalDate.value,
+            }
+        }
+
     },
 
-    validateFields() {
-        const { description, amount, date } = Form.getValues()
-        
-        if( description.trim() === "" || 
-            amount.trim() === "" || 
-            date.trim() === "" ) {
-                throw new Error("Por favor, preencha todos os campos")
+    validateFields(formType) {
+        if (formType=='transaction'){
+            const { description, amount, date } = Form.getValues(formType)
+            
+            if( description.trim() === "" || 
+                amount.trim() === "" || 
+                date.trim() === "" ) {
+                    throw new Error("Por favor, preencha todos os campos")
+            }
         }
+        else if (formType=='filter'){
+            const { startDate, finalDate} = Form.getValues(formType)
+
+            if (startDate!='' && finalDate!='' && startDate>finalDate){
+                throw new Error("Por favor, a data final deve ser superior a data inicial.")
+            }
+        }
+        
     },
 
-    formatValues() {
-        let { description, amount, date } = Form.getValues()
-        
-        amount = Utils.formatAmount(amount)
+    formatValues(formType) {
+        if (formType=='transaction'){
+            let { description, amount, date } = Form.getValues(formType)
+            
+            amount = Utils.formatAmount(amount)
 
-        date = Utils.formatDate(date)
-
-        return {
-            description,
-            amount,
-            date
+            return {
+                description,
+                amount,
+                date
+            }
+        }
+        else if (formType=='filter'){
+            const { startDate, finalDate} = Form.getValues(formType)
+            
+            return {
+                startDate,
+                finalDate
+            }
         }
     },
 
@@ -188,17 +286,31 @@ const Form = {
         Form.description.value = ""
         Form.amount.value = ""
         Form.date.value = ""
+        
+        Form.startDate.value = ""
+        Form.finalDate.value = ""
     },
 
-    submit(event) {
+    submit(event, formType) {
         event.preventDefault()
-
         try {
-            Form.validateFields()
-            const transaction = Form.formatValues()
-            Transaction.add(transaction)
+            Form.validateFields(formType)
+            const form = Form.formatValues(formType)
+            if (formType=='transaction'){
+                Transaction.add(form)
+                Modal.closeModal()
+            }
+            else if (formType=='filter'){
+                filter=Filter.select()
+                filter={
+                    'startDate': form.startDate,
+                    'finalDate': form.finalDate,
+                }
+                Filter.update(filter)
+                Modal.closeFilter()
+            }
             Form.clearFields()
-            Modal.close()
+            App.reload()
         } catch (error) {
             alert(error.message)
         }
@@ -227,12 +339,12 @@ function clickHandler() {
         localStorage.setItem("theme", "light");
     }
     totalImg()
-    totalLightbackground()
+    totalLightbackground(newTransactions)
 }
 themeSwitcher.addEventListener("click", clickHandler);
 
-window.onload = checkTheme();
-window.onload = totalImg();
+// window.onload = checkTheme();
+// window.onload = totalImg();
 
 
 function checkTheme() {
@@ -251,24 +363,25 @@ function checkTheme() {
 // implementando interatividade no card total
 var totalImagem = './assets/total.svg'
 function balanceCheck() {
-    var balanceValue = Transaction.total()
+    var balanceValue = Transaction.total(newTransactions)
     const localStorageTheme = localStorage.getItem("theme");
     if (localStorageTheme !== null && localStorageTheme === "dark" && balanceValue < 0 ){
         totalImagem = './assets/negativedarktotal.svg'
     }else {
         totalImagem = './assets/darktotal.svg'
     }
-
+    return totalImagem
 }
 
-function totalLightbackground () {
-    var balanceValue = Transaction.total()
+function totalLightbackground (newTransactions) {
+    var balanceValue = Transaction.total(newTransactions)
     const localStorageTheme = localStorage.getItem("theme");
+    document.getElementById('totalcard').style.backgroundColor = ''
     if (localStorageTheme !== null && localStorageTheme === "light" && balanceValue < 0 ){
         document.getElementById('totalcard').style.backgroundColor = '#e92929'
-    }else {
-        document.getElementById('totalcard').style.backgroundColor = ''
     }
+        
+    
 }
 
 function totalImg() {
@@ -286,15 +399,44 @@ function totalImg() {
 }
 
 
+
 const App = {
     init() {
-        Transaction.all.forEach(DOM.addTransaction)
-        DOM.updateBalance()
-        Storage.set(Transaction.all)
-        balanceCheck()
-        window.onload = balanceCheck()
-        window.onload = totalImg()
-        setTimeout(totalLightbackground(), 3000)
+        
+
+        filter=Filter.select()
+        if(filter.length==0){
+            newFilter={
+                'startDate':'',
+                'finalDate':''
+            }
+            Filter.update(newFilter)
+            filter=newFilter
+        }
+        newTransactions=[]
+        indexTransaction=0
+
+        while(indexTransaction<Transaction.all.length){
+            dateTransaction=Transaction.all[indexTransaction].date
+            insertTransaction=true
+            if (filter.startDate!='' && dateTransaction<filter.startDate){
+                insertTransaction = false
+            }
+            if (filter.finalDate!='' && dateTransaction>filter.finalDate){
+                insertTransaction = false
+            }
+            if (insertTransaction){
+                newTransactions.push(Transaction.all[indexTransaction])
+            }
+            indexTransaction++;
+        }
+
+        checkTheme()
+        newTransactions.forEach(DOM.addTransaction)
+        DOM.updateBalance(newTransactions)
+        Storage.set('transaction', Transaction.all)
+        totalImg()
+        setTimeout(totalLightbackground(newTransactions), 1)
     },
     reload() {
         DOM.clearTransactions()
