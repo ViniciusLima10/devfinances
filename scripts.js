@@ -399,6 +399,17 @@ function totalImg() {
 }
 
 
+function filterClear() {
+    // Form.submit(event,'filter')
+    filter=Filter.select()
+    newFilter={
+        'startDate':'',
+        'finalDate':''
+    }
+    Filter.update(newFilter)
+    filter = newFilter
+    App.reload()
+}
 
 const App = {
     init() {

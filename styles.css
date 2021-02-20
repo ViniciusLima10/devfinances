@@ -344,7 +344,10 @@ small.help{
 
 }
 
-
+.footOptions {
+    display: flex;
+    justify-content: flex-end;
+}
 
 /* Form ==================================== */
 #form {
