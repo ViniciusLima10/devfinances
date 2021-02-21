@@ -1,11 +1,20 @@
 // Adicionar modal/ remover modal
 const Modal = {
-    openModal() {
+    openModal(formType, index) {
         // abrir modal
         //Adicionar a class active ao modal
-        document.querySelector('.modal-overlay')
+        Form.formSettings(formType)
+        Form.formValues(formType, index)
+        if(formType == 'simple' || formType == 'edit' || formType == 'view'){
+            document.querySelector('.modal-overlay')
             .classList
             .add('active')
+        }else if (formType == 'filter'){
+            document.querySelector('.filter-overlay')
+            .classList
+            .add('active')
+        }
+
     },
     closeModal() {
         // Fechar modal
@@ -30,7 +39,7 @@ const Modal = {
             .querySelector('.filter-overlay')
             .classList
             .remove('active')
-    }
+    },
 }       
 
 const Storage = {
@@ -80,6 +89,12 @@ const Transaction = {
         App.reload()
     },
 
+    edit(transaction){
+        indexPosition = Transaction.selectIndexPosition(transaction)
+        Transaction.all.splice(indexPosition, 1, transaction)
+        return Transaction.all
+    },
+
     remove(identifier) {
         
         indexSelect = 0
@@ -95,6 +110,26 @@ const Transaction = {
         startDate= document.querySelector('input#startDate').value
         finalDate= document.querySelector('input#finalDate').value
         App.reload()
+    },
+
+    select(indexTransaction){
+        indexSelect=0
+        while(indexSelect<Transaction.all.length){
+            if(Transaction.all[indexSelect].identifier == indexTransaction){
+                return Transaction.all[indexSelect]
+            }
+            indexSelect++
+        }
+    },
+
+    selectIndexPosition(transaction){
+        indexSelect=0
+        while(indexSelect<Transaction.all.length){
+            if(Transaction.all[indexSelect].identifier == indexTransaction){
+                return indexSelect
+            }
+            indexSelect++
+        }
     },
 
     incomes(newTransactions) {
@@ -143,8 +178,9 @@ const DOM = {
         const tr = document.createElement('tr')
         tr.innerHTML = DOM.innerHTMLTransaction(transaction, index)
         tr.dataset.index = index
-
+        tr.setAttribute('id', `transaction${index}`)
         DOM.transactionsContainer.appendChild(tr)
+
     },
 
     innerHTMLTransaction(transaction, index) {
@@ -153,15 +189,19 @@ const DOM = {
         const amount = Utils.formatCurrency(transaction.amount)
         const date = Utils.formatDate(transaction.date)
 
+
         const html = `
         <td class="description">${transaction.description}</td>
         <td class="${CSSclass}">${amount}</td>
         <td class="date">${date}</td>
         <td>
-            <img onclick="Transaction.remove(${transaction.identifier})" src="./assets/minus.svg" alt="Remover transação">
+        <a href="#" onclick="Modal.openModal('edit', ${transaction.identifier})"><i class="far fa-edit"></i></a>
+        </td>
+        <td>
+            <img  onclick="Transaction.remove(${transaction.identifier})" src="./assets/minus.svg" alt="Remover transação">
         </td>
         `
-
+        
         return html
     },
 
@@ -215,20 +255,50 @@ const Form = {
     description: document.querySelector('input#description'),
     amount: document.querySelector('input#amount'),
     date: document.querySelector('input#date'),
-    index: document.querySelector('input#index'),
+    edit: document.querySelector('input#edit'),
 
 
     startDate: document.querySelector('input#startDate'),
     finalDate: document.querySelector('input#finalDate'),
 
-    
+    formSettings(formType) {
+        if(formType == 'simple' || formType == 'edit') {
+            document.getElementById('description').disabled = false
+            document.getElementById('amount').disabled = false
+            document.getElementById('date').disabled = false
+        }
+        else if(formType == 'view') {
+            document.getElementById('description').disabled = true
+            document.getElementById('amount').disabled = true
+            document.getElementById('date').disabled = true
+        }
+    },
+
+    formValues(formType, index) {
+        if(formType=='simple'){
+            document.getElementById('title').innerHTML='Nova Transação'
+        }else if(formType=='edit' || formType=='view') {
+            transaction=Transaction.select(index)
+            document.getElementById('description').value=transaction.description
+            document.getElementById('amount').value=transaction.amount/100
+            document.getElementById('date').value=transaction.date
+            document.getElementById('edit').value=transaction.identifier
+        }else if (formType=='filter'){
+            filter=Filter.select()
+
+            document.getElementById('startDate').value=String(filter.startDate)
+            document.getElementById('finalDate').value=String(filter.finalDate)
+        }
+
+    },
 
     getValues(formType) {
         if (formType=='transaction'){
             return {
                 description: Form.description.value,
                 amount: Form.amount.value,
-                date: Form.date.value
+                date: Form.date.value,
+                identifier: Form.edit.value
             }
         }
         else if (formType=='filter'){
@@ -262,14 +332,15 @@ const Form = {
 
     formatValues(formType) {
         if (formType=='transaction'){
-            let { description, amount, date } = Form.getValues(formType)
+            let { description, amount, date, identifier } = Form.getValues(formType)
             
             amount = Utils.formatAmount(amount)
 
             return {
                 description,
                 amount,
-                date
+                date,
+                identifier
             }
         }
         else if (formType=='filter'){
@@ -286,6 +357,7 @@ const Form = {
         Form.description.value = ""
         Form.amount.value = ""
         Form.date.value = ""
+        Form.edit.value = ""
         
         Form.startDate.value = ""
         Form.finalDate.value = ""
@@ -297,7 +369,11 @@ const Form = {
             Form.validateFields(formType)
             const form = Form.formatValues(formType)
             if (formType=='transaction'){
-                Transaction.add(form)
+                if(form.identifier==''){
+                    Transaction.add(form)
+                }else if(form.identifier!=''){
+                    Transaction.edit(form)
+                }
                 Modal.closeModal()
             }
             else if (formType=='filter'){
@@ -414,7 +490,6 @@ function filterClear() {
 const App = {
     init() {
         
-
         filter=Filter.select()
         if(filter.length==0){
             newFilter={
