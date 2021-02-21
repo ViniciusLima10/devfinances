@@ -1,4 +1,7 @@
-# devfinances
+<h1 align="center">
+    <a href="https://pt-br.reactjs.org/">🔗 Dev.finance$</a>
+</h1>
+<p align="center">💲 Aplicação web para controle financeiro 💲</p>
 
 🪐dev.finance$
 
