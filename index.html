@@ -66,7 +66,7 @@
             <h2 class="sr-only">Transações</h2>
 
             <div class="navOptions">
-                <a href="#" onclick="Modal.openModal()" class="button new">+ Nova Transação</a>
+                <a href="#" onclick="Modal.openModal('simple')" class="button new">+ Nova Transação</a>
 
                 
                 <a href="#" onclick="Modal.openFilter()" class="button new"><i class=" filter fas fa-sort-down"></i>Filtrar</a>
@@ -79,6 +79,7 @@
                         <th>Descrição</th>
                         <th>Valor</th>
                         <th>Data</th>
+                        <th></th>
                         <th></th>
                     </tr>
                 </thead>
@@ -98,7 +99,7 @@
     <div class="modal-overlay">
         <div class="modal">
             <div id="form">
-                <h2>Nova Transação</h2>
+                <h2 id='title'>Nova Transação</h2>
                 <form action="" onsubmit="Form.submit(event, 'transaction')">
                     <div class="input-group">
                         <label class='sr-only' for="description">Descrição</label>
@@ -134,8 +135,11 @@
                         placeholder='dd/mm/yyyy' />
                     </div>
 
+                    <div class="eddit">
+                        <input id='edit' class='sr-only' type="text">
+                    </div>
                     <div class="input-group actions">
-                        <a href="#" onclick="Modal.closeModal()" class="button cancel">Cancelar</a>
+                        <a href="#" onclick="Modal.closeModal(); Form.clearFields()" class="button cancel">Cancelar</a>
                         <button type="submit">Salvar</button>
                     </div>
                 </form>
@@ -181,6 +185,53 @@
         </div>
     </div>
     </div>
+    <!-- <div class="edit-overlay">
+        <div class="edit">
+            <div id="form">
+                <h2>Editar Transação</h2>
+                <form action="" onsubmit="">
+                    <div class="input-group">
+                        <label class='sr-only' for="description">Descrição</label>
+                        <input 
+                        type="text" 
+                        required='none'
+                        id='descriptionEdit' 
+                        name='descriptionEdit' 
+                        placeholder="Descrição" />
+                    </div>
+
+                    <div class="input-group">
+                        <label class='sr-only' for="amount">Valor</label>
+                        <input 
+                        type="number"
+                        step='0.01' 
+                        required='none'
+                        id='amountEdit' 
+                        name='amountEdit' 
+                        placeholder="0,00" />
+                        <small class="help">Use o sinal - (negativo) para despesas e , (vírgula) para casas
+                            decimais</small>
+                    </div>
+
+                    <div class="input-group">
+                        <label class='sr-only' for="date">Data</label>
+                        <input 
+                        type="date" 
+                        required='none'
+                        id='dateEdit' 
+                        name='dateEdit' 
+                        max="2999-01-01" 
+                        placeholder='dd/mm/yyyy' />
+                    </div>
+
+                    <div class="input-group actions">
+                        <a href="#" onclick="Modal.closeEdit()" class="button cancel">Cancelar</a>
+                        <button type="submit">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div> -->
 
     <footer class='footer'>
         <p>dev.finance$
